@@ -7,7 +7,31 @@ import datetime
 conexion = sqlite3.connect("registro_pacientes.db")
 cursor = conexion.cursor()
 
-#### Tabla datos estáticos clientes "pacientes"
+#### Tabla datos estáticos "administrativa"
+
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS administracion(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_paciente INTEGER NOT NULL,
+        id_turnos INTEGER NOT NULL
+    )
+''')
+conexion.commit()
+
+#### Tabla datos estáticos "profesional_salud"
+
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS profesional(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre_prof TEXT NOT NULL,
+        apellido_prof TEXT NOT NULL,
+        documento_identidad INTEGER NOT NULL,
+        matricula INTEGER NOT NULL
+    )
+''')
+conexion.commit()
+
+#### Tabla datos estáticos "pacientes"
 
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS pacientes(
@@ -24,7 +48,7 @@ cursor.execute('''
 ''')
 conexion.commit()
 
-#### Tabla datos estáticos clientes "turnos"
+#### Tabla datos estáticos "turnos"
 
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS turnos(
@@ -38,7 +62,7 @@ cursor.execute('''
 ''')
 conexion.commit()
 
-#### Tabla datos estáticos clientes "historias_clinicas"
+#### Tabla datos estáticos "historias_clinicas"
 
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS historias_clinicas(
@@ -52,6 +76,102 @@ cursor.execute('''
     )
 ''')
 conexion.commit()
+
+
+# AGREGAR NUEVO PROFESIONAL
+
+def nuevo_profesional():
+    while True:
+        
+        agregar_profesional: str = input("¿Desea registrar un nuevo profesional? Si / No (Escriba Salir para cancelar la operación): ").strip().title()
+        
+        if agregar_profesional == "Salir" or agregar_profesional == "No":
+            print("==== Operacion cancelada o finalizada ====")
+            break
+        
+        if agregar_profesional == "Si":
+            
+            nombre_prof: str = input("Nombre: ").strip().title()
+            apellido_prof: str = input("Apellido: ").strip().title()
+            
+            if not nombre_prof or not apellido_prof:
+                print("Error: Los campos de texto no pueden quedar vacíos.")
+                continue
+            
+            try:
+                documento_identidad: int = input("D.N.I: ")
+                matricula: int = input("Matricula profesional: ")
+            except ValueError:
+                print("¡Error! DNI y Matricula deben ser solo números.")
+                continue
+    
+        cursor.execute('INSERT INTO profesional (nombre_prof, apellido_prof, documento_identidad, matricula) VALUES (?,?,?,?)', (nombre_prof, apellido_prof, documento_identidad, matricula))
+        conexion.commit()
+                
+                
+        print("\n===============================================")
+        print("======= PROFESIONAL REGISTRADO CON ÉXITO =======")
+        print(f"Nombre y Apellido: {nombre_prof} {apellido_prof}")
+        print(f"D.N.I:             {documento_identidad}")
+        print(f"Matrícula:         {matricula}")
+        print("===============================================\n")
+    
+    
+# VER PACIENTES DEL PROFESIONAL
+
+def ver_pacientes_profesional():
+    while True:
+        busqueda_paciente: int = int(input("Buscar paciente por D.N.I: "))
+        
+        if busqueda_paciente == "":
+            print("Este campo no puede estar vacio")
+            continue
+
+        if not busqueda_paciente:
+            print("Este campo no puede estar vacío.")
+            continue
+        
+        cursor.execute('SELECT nombre, apellido, documento_identidad, telefono FROM pacientes WHERE documento_identidad = ?',(busqueda_paciente,))
+        paciente = cursor.fetchone()
+        conexion.commit()
+        
+        try:
+            documento_identidad = int(busqueda_paciente)
+        except ValueError:
+            print("¡Error! El DNI debe contener únicamente números.")
+            continue
+        
+        if paciente:
+            nombre, apellido, documento_identidad, telefono = paciente
+            print()
+            print("\n===========================")
+            print("==== REGISTRO ENCONTRADO ====")
+            print("=============================")
+            print()
+            print(f"Nombre y Apellido: {nombre} {apellido}")
+            print(f"D.N.I: {documento_identidad}")
+            print(f"Teléfono: {telefono}")
+            print()
+            
+        nueva_busqueda: int = int(input("¿Desea buscar otro registro? Si / No (Escriba Salir para cancelar la operación): "))
+        
+        if nueva_busqueda == "Salir" or nueva_busqueda == "No":
+            print("==== Operacion cancelada o finalizada ====")
+            break
+        
+        if nueva_busqueda == "Si":
+            continue
+
+# ACTUALIZAR HISTORIA PACIENTE
+
+def actualizar_historia_pac():
+    pass
+
+
+# ELIMINAR PACIENTE
+
+def eliminar_paciente():
+    pass
 
 
 # AGREGAR NUEVO PACIENTE
@@ -92,7 +212,7 @@ def nuevo_paciente():
                 documento_identidad: int = int(input("D.N.I: "))
                 contacto_emergencia: int = int(input("Contacto de emergencia: "))
             except ValueError:
-                print("¡Error! Teléfono, DNI y Contacto deben ser solo números enteros.")
+                print("¡Error! Teléfono, DNI y Contacto deben ser solo números.")
                 continue
             
             fecha_consulta = datetime.datetime.now().strftime("%c")
@@ -107,6 +227,12 @@ def nuevo_paciente():
     print(f"Nombre y Apellido: {nombre} {apellido} \n")
     print()
     
+
+# VER TURNO
+
+def ver_turno_pac():
+    pass
+
     
 # AGREGAR NUEVO TURNO
     
@@ -124,7 +250,7 @@ def nuevo_turno():
             try:
                 dni: int = int(input("D.N.I: "))
             except ValueError:
-                print("¡Error! El DNI debe ser solo números enteros.")
+                print("¡Error! El DNI debe ser solo números.")
                 continue
             
             cursor.execute('SELECT id_paciente, nombre, apellido FROM pacientes WHERE documento_identidad = ?', (dni,))
@@ -205,7 +331,7 @@ def nueva_historia():
             try:
                 dni = int(input("Ingrese el D.N.I del paciente: "))
             except ValueError:
-                print("¡Error! El DNI debe ser solo números enteros.")
+                print("¡Error! El DNI debe ser solo números.")
                 continue
             
             cursor.execute(
