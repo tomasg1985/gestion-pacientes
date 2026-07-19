@@ -122,15 +122,11 @@ def nuevo_profesional():
 def ver_pacientes_profesional():
     while True:
         busqueda_paciente: int = int(input("Buscar paciente por D.N.I: "))
-        
-        if busqueda_paciente == "":
-            print("Este campo no puede estar vacio")
-            continue
-
+    
         if not busqueda_paciente:
             print("Este campo no puede estar vacío.")
             continue
-        
+            
         cursor.execute('SELECT nombre, apellido, documento_identidad, telefono FROM pacientes WHERE documento_identidad = ?',(busqueda_paciente,))
         paciente = cursor.fetchone()
         conexion.commit()
@@ -140,7 +136,7 @@ def ver_pacientes_profesional():
         except ValueError:
             print("¡Error! El DNI debe contener únicamente números.")
             continue
-        
+            
         if paciente:
             nombre, apellido, documento_identidad, telefono = paciente
             print()
@@ -152,8 +148,8 @@ def ver_pacientes_profesional():
             print(f"D.N.I: {documento_identidad}")
             print(f"Teléfono: {telefono}")
             print()
-            
-        nueva_busqueda: int = int(input("¿Desea buscar otro registro? Si / No (Escriba Salir para cancelar la operación): "))
+                
+        nueva_busqueda = input("¿Desea buscar otro registro? Si / No (Escriba Salir para cancelar la operación): ")
         
         if nueva_busqueda == "Salir" or nueva_busqueda == "No":
             print("==== Operacion cancelada o finalizada ====")
@@ -166,13 +162,6 @@ def ver_pacientes_profesional():
 
 def actualizar_historia_pac():
     pass
-
-
-# ELIMINAR PACIENTE
-
-def eliminar_paciente():
-    pass
-
 
 # AGREGAR NUEVO PACIENTE
 
@@ -231,9 +220,44 @@ def nuevo_paciente():
 # VER TURNO
 
 def ver_turno_pac():
-    pass
-
+    while True:
+        buscar_turno: int = int(input("Buscar paciente por D.N.I: "))
+        
+        if not buscar_turno:
+            print("Este campo no puede estar vacio")
+            continue
+        
+        cursor.execute('SELECT p.nombre, p.apellido, p.documento_identidad, fecha_turno, hora_turno, estado FROM pacientes p INNER JOIN turnos t ON p.id_paciente = t.id_paciente WHERE p.documento_identidad = ?',(buscar_turno,))
+        paciente = cursor.fetchone()
+        conexion.commit()
+        
+        if paciente:
+            nombre, apellido, documento_identidad, fecha_turno, hora_turno, estado = paciente
+            print()
+            print("\n===========================")
+            print("==== REGISTRO ENCONTRADO ====")
+            print("=============================")
+            print()
+            print(f"Nombre y Apellido: {nombre} {apellido}")
+            print(f"D.N.I: {documento_identidad}")
+            print("\n=======================")
+            print("==== DATOS DEL TURNO ====")
+            print("=========================")
+            print(f"Fecha: {fecha_turno}")
+            print(f"Hora: {hora_turno}")
+            print(f"Estado: {estado}")
+            print()
     
+        buscar_nuevo_turno = input("¿Desea buscar un nuevo turno? Si / No (Escriba Salir para cancelar la operación): ").strip().title()
+        
+        if buscar_nuevo_turno == "Salir" or buscar_nuevo_turno == "No":
+            print("==== Operacion cancelada o finalizada ====")
+            break
+
+        if buscar_nuevo_turno == "Si":
+            continue
+        
+        
 # AGREGAR NUEVO TURNO
     
 def nuevo_turno():
